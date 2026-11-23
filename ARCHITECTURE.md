@@ -107,6 +107,24 @@ graph LR
 
 ---
 
+## 6. REST API
+
+Спецификация OpenAPI 3.0: [openapi3.yaml](openapi3.yaml)
+
+| Метод | URI | Описание | Доступ (роль) | Код |
+|---|---|---|---|---|
+| POST | /api/v1/auth/login | Вход, выдача токена | Все | 200 OK |
+| GET | /api/v1/users | Список пользователей | Авторизованный | 200 OK |
+| POST | /api/v1/users | Создание пользователя | Оператор | 201 Created |
+| GET | /api/v1/cars | Список автомобилей (фильтр по статусу) | Авторизованный | 200 OK |
+| POST | /api/v1/cars | Добавление автомобиля | Оператор | 201 Created |
+| PUT | /api/v1/cars/{id} | Обновление статуса автомобиля | Оператор | 200 OK |
+| DELETE | /api/v1/cars/{id} | Удаление автомобиля | Оператор | 204 No Content |
+| GET | /api/v1/bookings | Список бронирований | Авторизованный | 200 OK |
+| POST | /api/v1/bookings | Создание бронирования | Пользователь | 201 Created |
+| DELETE | /api/v1/bookings/{id} | Отмена бронирования | Пользователь | 204 No Content |
+
+
 ## 5. Инструменты
 
 - C4-диаграмма: Mermaid.js ([mermaid.live](https://mermaid.live)), исходник — `diagrams/c4_container.mmd`, экспорт — `diagrams/c4_container.png`.
