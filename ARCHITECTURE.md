@@ -107,6 +107,13 @@ graph LR
 
 ---
 
+## 5. Инструменты
+
+- C4-диаграмма: Mermaid.js ([mermaid.live](https://mermaid.live)), исходник — `diagrams/c4_container.mmd`, экспорт — `diagrams/c4_container.png`.
+- ER-диаграмма: dbdiagram.io (DBML), исходник — `diagrams/erd.dbml`, экспорт — `diagrams/erd.png`.
+
+---
+
 ## 6. REST API
 
 Спецификация OpenAPI 3.0: [openapi3.yaml](openapi3.yaml)
@@ -123,9 +130,3 @@ graph LR
 | GET | /api/v1/bookings | Список бронирований | Авторизованный | 200 OK |
 | POST | /api/v1/bookings | Создание бронирования | Пользователь | 201 Created |
 | DELETE | /api/v1/bookings/{id} | Отмена бронирования | Пользователь | 204 No Content |
-
-
-## 5. Инструменты
-
-- C4-диаграмма: Mermaid.js ([mermaid.live](https://mermaid.live)), исходник — `diagrams/c4_container.mmd`, экспорт — `diagrams/c4_container.png`.
-- ER-диаграмма: dbdiagram.io (DBML), исходник — `diagrams/erd.dbml`, экспорт — `diagrams/erd.png`.
