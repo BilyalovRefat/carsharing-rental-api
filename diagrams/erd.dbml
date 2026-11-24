@@ -1,0 +1,44 @@
+Project carsharing {
+  database_type: 'PostgreSQL'
+}
+
+Table Users {
+  id integer [pk, increment]
+  email varchar(100) [not null, unique]
+  role varchar(20) [not null, default: 'driver']
+  created_at timestamp [default: `now()`]
+}
+
+Table Cars {
+  id integer [pk, increment]
+  license_plate varchar(20) [not null, unique]
+  status varchar(20) [not null, note: 'available / rented / maintenance']
+  created_at timestamp [default: `now()`]
+}
+
+Table Bookings {
+  id integer [pk, increment]
+  user_id integer [not null, ref: > Users.id]
+  car_id integer [not null, ref: > Cars.id]
+  status varchar(20) [not null]
+  created_at timestamp [default: `now()`]
+}
+
+Table Trips {
+  id integer [pk, increment]
+  booking_id integer [not null, ref: > Bookings.id]
+  start_odometer integer [not null]
+  end_odometer integer [not null]
+  start_fuel integer [not null]
+  end_fuel integer [not null]
+  created_at timestamp [default: `now()`]
+}
+
+Table Deposits {
+  id integer [pk, increment]
+  booking_id integer [not null, ref: > Bookings.id]
+  amount decimal(10,2) [not null]
+  status varchar(20) [not null, note: 'locked / refunded / forfeited']
+  locked_at timestamp
+}
+

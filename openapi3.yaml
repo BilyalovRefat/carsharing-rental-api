@@ -1,0 +1,408 @@
+openapi: 3.0.3
+info:
+  title: Carsharing Rental API
+  description: |
+    REST API для сервиса краткосрочной аренды автомобилей.
+    Лабораторная работа №2. Сервер предоставляет услуги carsharing:
+    аутентификация пользователей, управление автомобилями,
+    бронирования, поездки и депозиты.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Локальный сервер разработки
+
+paths:
+  /auth/login:
+    post:
+      summary: Вход в систему (выдача токена)
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Неверный email или пароль
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users:
+    get:
+      summary: Получить список пользователей
+      tags: [Users]
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Создать нового пользователя
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: Пользователь успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /cars:
+    get:
+      summary: Получить список автомобилей
+      description: Возвращает все автомобили. Параметр status — фильтр по статусу.
+      tags: [Cars]
+      parameters:
+        - name: status
+          in: query
+          required: false
+          description: Фильтр по статусу автомобиля
+          schema:
+            type: string
+            enum: [available, rented, maintenance]
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CarResponse'
+        '401':
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Создать новый автомобиль (только для оператора)
+      tags: [Cars]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCarRequest'
+      responses:
+        '201':
+          description: Автомобиль успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarResponse'
+        '400':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Доступ запрещён (нужна роль operator)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /cars/{id}:
+    put:
+      summary: Обновить данные автомобиля (статус и др.)
+      tags: [Cars]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID автомобиля
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCarRequest'
+      responses:
+        '200':
+          description: Автомобиль успешно обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarResponse'
+        '404':
+          description: Автомобиль не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Удалить автомобиль (только для оператора)
+      tags: [Cars]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID автомобиля
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Автомобиль успешно удалён
+        '404':
+          description: Автомобиль не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bookings:
+    get:
+      summary: Получить список бронирований
+      tags: [Bookings]
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingResponse'
+        '401':
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Создать новое бронирование
+      tags: [Bookings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingRequest'
+      responses:
+        '201':
+          description: Бронирование успешно создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+        '400':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Автомобиль уже забронирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bookings/{id}:
+    delete:
+      summary: Отменить бронирование
+      tags: [Bookings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID бронирования
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Бронирование успешно отменено
+        '404':
+          description: Бронирование не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          example: qwerty123
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        user:
+          $ref: '#/components/schemas/UserResponse'
+
+    CreateUserRequest:
+      type: object
+      required: [email, password, role]
+      properties:
+        email:
+          type: string
+          format: email
+          example: ivan@example.com
+        password:
+          type: string
+          example: qwerty123
+        role:
+          type: string
+          enum: [driver, operator]
+          example: driver
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 8f3a4567-e89b-12d3-a456-426614174000
+        email:
+          type: string
+          example: ivan@example.com
+        role:
+          type: string
+          enum: [driver, operator]
+          example: driver
+        created_at:
+          type: string
+          format: date-time
+          example: 2024-10-15T09:30:00Z
+
+    CreateCarRequest:
+      type: object
+      required: [license_plate, model]
+      properties:
+        license_plate:
+          type: string
+          example: А123ВС77
+        model:
+          type: string
+          example: Kia Rio
+
+    UpdateCarRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [available, rented, maintenance]
+          example: maintenance
+
+    CarResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 2c9e5f1a-7b3d-4c2e-9f1a-8b7c6d5e4f3a
+        license_plate:
+          type: string
+          example: А123ВС77
+        model:
+          type: string
+          example: Kia Rio
+        status:
+          type: string
+          enum: [available, rented, maintenance]
+          example: available
+        created_at:
+          type: string
+          format: date-time
+          example: 2024-10-15T09:30:00Z
+
+    CreateBookingRequest:
+      type: object
+      required: [car_id]
+      properties:
+        car_id:
+          type: string
+          format: uuid
+          example: 2c9e5f1a-7b3d-4c2e-9f1a-8b7c6d5e4f3a
+
+    BookingResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 5f1a8b7c-6d5e-4f3a-9b2c-1a0f9e8d7c6b
+        user_id:
+          type: string
+          format: uuid
+          example: 8f3a4567-e89b-12d3-a456-426614174000
+        car_id:
+          type: string
+          format: uuid
+          example: 2c9e5f1a-7b3d-4c2e-9f1a-8b7c6d5e4f3a
+        status:
+          type: string
+          enum: [created, active, completed, cancelled]
+          example: created
+        created_at:
+          type: string
+          format: date-time
+          example: 2024-10-15T09:30:00Z
+
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [INVALID_INPUT, NOT_FOUND, FORBIDDEN, CONFLICT, UNAUTHORIZED]
+          example: INVALID_INPUT
+        message:
+          type: string
+          example: Некорректные данные запроса
+        timestamp:
+          type: string
+          format: date-time
+          example: 2024-10-15T09:30:00Z
